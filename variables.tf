@@ -521,6 +521,24 @@ variable "lifecycle_rule" {
     The `noncurrent_version_transition` object supports the following attributes:
       days          - (Required) Specifies the number of days noncurrent object versions transition.
       storage_class - (Required) Specifies the storage class to which you want the noncurrent object versions to transition. Can only be `COLD` or `STANDARD_IA`.
+
+    The `filter` object supports the following attributes:
+      object_size_greater_than - (Optional) Minimum object size (in bytes) to which the rule applies.
+      object_size_less_than    - (Optional) Maximum object size (in bytes) to which the rule applies.
+      prefix                   - (Optional) Object key prefix identifying one or more objects to which the rule applies.
+      tag                      - (Optional) A key-value pair used to filter objects by tag.
+                                  Consists of:
+                                    key   - (Required) Tag key.
+                                    value - (Required) Tag value.
+
+      and                      - (Optional) A list with maximum one element containing a logical AND
+                                  operator applied to one or more filter parameters. Use this when
+                                  combining multiple filter conditions. The object inside `and`
+                                  supports the following attributes:
+                                    object_size_greater_than - (Optional) Minimum object size (in bytes).
+                                    object_size_less_than    - (Optional) Maximum object size (in bytes).
+                                    prefix                   - (Optional) Object key prefix.
+                                    tags                     - (Optional) Map of string key-value pairs for filtering by multiple tags.
   EOF
   nullable    = false
   type = list(object({
@@ -544,6 +562,21 @@ variable "lifecycle_rule" {
     noncurrent_version_transition = optional(object({
       days          = number
       storage_class = string
+    }))
+    filter = optional(object({
+      object_size_greater_than = optional(number)
+      object_size_less_than    = optional(number)
+      prefix                   = optional(string)
+      tag = optional(object({
+        key   = string
+        value = string
+      }))
+      and = optional(list(object({
+        object_size_greater_than = optional(number)
+        object_size_less_than    = optional(number)
+        prefix                   = optional(string)
+        tags                     = optional(map(string))
+      })))
     }))
   }))
   default = []

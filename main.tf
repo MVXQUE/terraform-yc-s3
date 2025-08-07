@@ -169,6 +169,33 @@ resource "yandex_storage_bucket" "this" {
           storage_class = lifecycle_rule.value.noncurrent_version_transition.storage_class
         }
       }
+      dynamic "filter" {
+        for_each = lifecycle_rule.value.filter != null ? [lifecycle_rule.value.filter] : []
+        content {
+          object_size_greater_than = lookup(filter.value, "object_size_greater_than", null)
+          object_size_less_than    = lookup(filter.value, "object_size_less_than", null)
+          prefix                   = lookup(filter.value, "prefix", null)
+  
+          dynamic "tag" {
+            for_each = lookup(filter.value, "tag", null) != null ? [filter.value.tag] : []
+            content {
+              key   = tag.value.key
+              value = tag.value.value
+            }
+          }
+  
+          dynamic "and" {
+            for_each = lookup(filter.value, "and", null) != null ? [filter.value.and] : []
+            content {
+              object_size_greater_than = lookup(and.value, "object_size_greater_than", null)
+              object_size_less_than    = lookup(and.value, "object_size_less_than", null)
+              prefix                   = lookup(and.value, "prefix", null)
+  
+              tags = lookup(and.value, "tags", null)
+            }
+          }
+        }
+      }
     }
   }
 
